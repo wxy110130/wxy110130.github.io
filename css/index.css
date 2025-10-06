@@ -7832,7 +7832,7 @@ input#pic-link {
   -o-transition: all 0.3s;
   opacity: 0;
   box-shadow: 0 0 3px var(--theme-color) !important;
-  /*line-height: 45px; */ /*10/4exchange如果垂直位置不居中可以微调此值，也可以删了*/
+  line-height: 40px;  /*10/4exchange如果垂直位置不居中可以微调此值，也可以删了*/
 }
 #page-name:hover:before {
   opacity: 1;
@@ -8229,19 +8229,24 @@ a:hover {
 }
 [data-theme="light"] #fps {
   background-color: rgba(255, 255, 255, 0.85);
+  /* 提供一个明确的毛玻璃回退值，JS 仍可通过 --backdrop-filter 覆盖（优先级受后续注入样式影响） */
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
   backdrop-filter: var(--backdrop-filter);
   -webkit-backdrop-filter: var(--backdrop-filter);
   padding: 9px 6px; /* 上下各加1px，横向保持足够空间 */
-  border-radius: 6px; /* 圆角更圆滑 */
+  border-radius: 10px; /* 圆角更圆滑 */
   font-size: 13px;
   line-height: 1;
 }
 [data-theme="dark"] #fps {
   background-color: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
   backdrop-filter: var(--backdrop-filter);
   -webkit-backdrop-filter: var(--backdrop-filter);
   padding: 9px 6px; /* 上下各加1px，横向保持足够空间 */
-  border-radius: 6px; /* 圆角更圆滑 */
+  border-radius: 10px; /* 圆角更圆滑 */
   font-size: 13px;
   line-height: 1;
 }
@@ -9537,12 +9542,67 @@ hr:before {
 /* 针对直接通过 animation 名称使用的情况，做一次安全覆盖（不会影响循环动画如 marquee） */
 @media (prefers-reduced-motion: no-preference) {
   :where(.tk-extras, #owo-big, .animated, .fade-in, .enter, .appear) {
-    animation-duration: 0.18s !important;
-    -webkit-animation-duration: 0.18s !important;
+    /* 更短更紧凑的入场动画，确保从 70% 缩放起始的关键帧生效 */
+    animation-duration: 0.12s !important;
+    -webkit-animation-duration: 0.12s !important;
     animation-timing-function: cubic-bezier(0.42, 0, 0.3, 1.11) !important;
   }
 }
 
+/* 放慢卡片中行驶的小车图标（faa-passing）以减缓抖动感 */
+.faa-passing.animated {
+  /* 如果库里已有动画名称，直接覆盖时长更可靠 */
+  animation-duration: 2s !important;
+  -webkit-animation-duration: 2s !important;
+  animation-iteration-count: infinite; /* 保持循环 */
+}
+
+/* 让常见卡片/面板的圆角更加平滑 */
+#recent-posts > .recent-post-item,
+#aside-content .card-widget,
+div#post,
+div#page,
+div#archive {
+  border-radius: 14px;
+}
+
+
+/* ===== Loading avatar hint =====
+  在用于显示加载头像的元素下方添加一行提示文字："单击任意区域取消加载"
+  使用伪元素以免修改 HTML；兼容暗/亮主题和移动端
+*/
+.loading-img {
+  position: relative; /* ensure pseudo-element is positioned relative to the avatar */
+  display: inline-block;
+}
+.loading-img::after {
+  content: "单击任意区域取消加载";
+  position: absolute;
+  left: 50%;
+  top: 100%; /* 放在元素正下方 */
+  transform: translateX(-50%);
+  margin-top: 65px; /* 向下移动 10px（原8px+10px=18px） */
+  font-size: calc(0.85rem + 8px); /* 字体调大10px */
+  line-height: 1;
+  color: rgba(0,0,0,0.65);
+  white-space: nowrap;
+  pointer-events: none; /* 不影响点击事件 */
+  z-index: 9999;
+  font-weight: bold; /* 加粗 */
+}
+
+/* 暗黑主题颜色调整 */
+[data-theme="dark"] .loading-img::after {
+  color: rgba(255,255,255,0.78);
+}
+
+/* 小屏幕适配：字体稍小、间距更紧凑 */
+@media screen and (max-width: 640px) {
+  .loading-img::after {
+   font-size: calc(0.75rem + 10px);
+   margin-top: 16px;
+  }
+}
 
 .search-dialog {
   position: fixed;

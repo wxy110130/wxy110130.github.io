@@ -3066,7 +3066,8 @@ if (localStorage.getItem("blurRad") == undefined) {
 }
 var curBlur = localStorage.getItem("blurRad"); // 当前模糊半径
 var miniBlur = curBlur * 30;
-document.getElementById("blurNum").innerText = `:root{--blur-num: blur(${curBlur}px) saturate(120%) !important`;
+// 保证写入的 CSS 语法完整
+document.getElementById("blurNum").innerText = `:root{--blur-num: blur(${curBlur}px) saturate(120%) !important;}`;
 function setBlurNum() {
   var elem = document.getElementById("blurSet");
   var newBlur = elem.value;
@@ -3077,26 +3078,34 @@ function setBlurNum() {
   miniBlur = curBlur * 0.95;
   // var max = elem.getAttribute("max");
   document.querySelector('#rang_blur').style.width = miniBlur + "%";
-  document.getElementById("blurNum").innerText = `:root{--blur-num: blur(${curBlur}px) saturate(120%) !important`;
+  document.getElementById("blurNum").innerText = `:root{--blur-num: blur(${curBlur}px) saturate(120%) !important;}`;
 };
-
 
 // 模糊效果开关
 if (localStorage.getItem("blur") == undefined) {
-  localStorage.setItem("blur", 0);
+  localStorage.setItem("blur", "0");
 }
-if (localStorage.getItem("blur") == 0) {
-  document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: none}`;
-} else {
-  document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: var(--blur-num)}`;
+function applyBlurSetting() {
+  if (localStorage.getItem("blur") == "0") {
+    document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: none;}`;
+  } else {
+    // 直接写入具体的 blur(px) 值，避免运行时 var() 链导致 none 覆盖
+    var b = localStorage.getItem("blurRad") || 20;
+    document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: blur(${b}px) saturate(120%) !important;}`;
+  }
 }
+// 页面加载时立即应用模糊设置，避免进度条异常
+document.addEventListener('DOMContentLoaded', applyBlurSetting);
+document.addEventListener('pjax:complete', applyBlurSetting);
+
 function setBlur() {
   if (document.getElementById("blur").checked) {
-    localStorage.setItem("blur", 1);
-    document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: var(--blur-num)}`;
+    localStorage.setItem("blur", "1");
+    var b2 = localStorage.getItem("blurRad") || 20;
+    document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: blur(${b2}px) saturate(120%) !important;}`;
   } else {
-    localStorage.setItem("blur", 0);
-    document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: none}`;
+    localStorage.setItem("blur", "0");
+    document.getElementById("settingStyle").innerText = `:root{--backdrop-filter: none;}`;
   }
 }
 
